@@ -1,0 +1,86 @@
+swagger: "2.0"
+info:
+  description: "This is TheBang game microservice"
+  version: "1.0.0"
+  title: "TheBang game"
+  contact:
+    email: "a.baronskiy@mail.ru"
+host: "пока_нигде_не_захостчен))"
+
+tags:
+- name: "room"
+  description: "Все про манипуляции с комнатами"
+  
+schemes:
+- "http"
+
+paths:
+  /room:
+    get:
+      tags:
+      - "room"
+      summary: "Получение комнат"
+      description: "Получение списка комнат"
+      operationId: ""
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Список комнат был успешно получен"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Room"
+
+    post:
+      tags:
+        - "room"
+      summary: "Создание новой комнаты + подключение к ней по WS"
+      operationId: ""
+      produces:
+      - "application/json"
+      responses:
+      # нужно обсудить в какой момент будет подключение и сразу ли при создании комнаты происходит подключение
+        # 201:
+        #   description: "Комната была успешно создана"
+        #   schema:
+        #     $ref: "#/definitions/Room"
+          
+definitions:
+  Room:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        example: "TopRoom"
+      max_players:
+        type: "integer"
+        example: "100"
+      players_count:
+        type: "integer"
+        example: "10"
+      players:
+        type: "array"
+        items:
+          $ref: "#/definitions/Player"
+
+
+  Player:
+    type: "object"
+    properties:
+      id: 
+        type: "integer"
+        example: "007"
+      nickname:
+        type: "string"
+        example: "TopGamer"
+      photo_url:
+        type: "string"
+        example: "my_top_photo_url"
+
+        
+externalDocs:
+  description: "Find more informtion on GitHub"
+  url: "https://github.com/go-park-mail-ru/2019_1_TheBang_Game"
+        
+      
