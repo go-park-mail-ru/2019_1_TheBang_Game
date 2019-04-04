@@ -36,6 +36,7 @@ func (g *Game) RoomsList() []*room.Room {
 	return rooms
 }
 
+// Изменить способ получения id комнаты, возможны коллизии
 func (g *Game) NewRoom() (*room.Room, error) {
 	if g.RoomsCount == g.MaxRoomsCount {
 		config.Logger.Warnw("NewRoom",
@@ -54,6 +55,9 @@ func (g *Game) NewRoom() (*room.Room, error) {
 		MaxPlayers: config.MaxPlayersInRoom,
 	}
 	g.RoomsCount++
+
+	// Запуск комнаты
+	go g.Rooms[id].RunRoom()
 
 	config.Logger.Infow("NewRoom",
 		"msg", fmt.Sprintf("New room [id:%v, name:%v] was created", id, roomName))

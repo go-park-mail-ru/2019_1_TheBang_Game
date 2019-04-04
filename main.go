@@ -6,10 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type point struct {
-	A uint
-}
-
 func main() {
 	router := gin.Default()
 
