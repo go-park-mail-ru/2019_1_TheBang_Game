@@ -1,6 +1,8 @@
 package config
 
 const (
-	MaxPlayersInRoom = 4
-	MaxRoomsInGame   = 10
+	MaxPlayersInRoom uint = 4
+	MaxRoomsInGame   uint = 10
 )
+
+var Logger = NewGlobalLogger()
