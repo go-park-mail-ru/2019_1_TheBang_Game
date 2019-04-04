@@ -48,15 +48,17 @@ func (g *Game) NewRoom() (*room.Room, error) {
 	roomName := facker.Name()
 
 	id := g.RoomsCount + 1
+	g.Rooms[id] = &room.Room{
+		Id:         id,
+		Name:       roomName,
+		MaxPlayers: config.MaxPlayersInRoom,
+	}
 	g.RoomsCount++
 
 	config.Logger.Infow("NewRoom",
 		"msg", fmt.Sprintf("New room [id:%v, name:%v] was created", id, roomName))
 
-	return &room.Room{
-		Id:   id,
-		Name: "TEST",
-	}, nil
+	return g.Rooms[id], nil
 }
 
 func (g *Game) DeleteRoom(id uint) {
