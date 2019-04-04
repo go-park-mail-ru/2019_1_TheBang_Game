@@ -1,19 +1,20 @@
 package main
 
 import (
-	"BangGame/pkg/room"
-
 	"BangGame/pkg/game"
 
 	"github.com/gin-gonic/gin"
 )
 
+type point struct {
+	A uint
+}
+
 func main() {
 	router := gin.Default()
-	game := game.Game{}
-	game.NewGame()
 
-	router.GET("/room", room.RoomsListHandle)
+	router.GET("/room", game.RoomsListHandle)
 
 	router.Run(":8081")
+
 }

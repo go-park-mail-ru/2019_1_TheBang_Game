@@ -2,6 +2,6 @@ package game
 
 import "errors"
 
-const (
+var (
 	ErrorMaxRoomsLimit = errors.New("Rooms limit")
 )

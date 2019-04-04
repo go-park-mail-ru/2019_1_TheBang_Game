@@ -3,15 +3,20 @@ package game
 import (
 	"BangGame/config"
 	"BangGame/pkg/room"
+	"fmt"
+
+	"github.com/manveru/faker"
 )
 
+var GameInst = NewGame()
+
 type Game struct {
-	MaxRoomsCount uint                `max_rooms_count`
-	Rooms         map[uint]*room.Room `rooms`
-	RoomsCount    uint                `rooms_count`
+	MaxRoomsCount uint                `json:"max_rooms_count"`
+	Rooms         map[uint]*room.Room `json:"rooms"`
+	RoomsCount    uint                `json:"rooms_count"`
 }
 
-func (g *Game) NewGame() *Game {
+func NewGame() *Game {
 	config.Logger.Infow("NewGame",
 		"msg", "Game was created",
 	)
@@ -22,24 +27,35 @@ func (g *Game) NewGame() *Game {
 	}
 }
 
-func (g *Game) NewRoom() (*Room, error) {
+func (g *Game) RoomsList() []*room.Room {
+	rooms := []*room.Room{}
+	for _, room := range g.Rooms {
+		rooms = append(rooms, room)
+	}
+
+	return rooms
+}
+
+func (g *Game) NewRoom() (*room.Room, error) {
 	if g.RoomsCount == g.MaxRoomsCount {
 		config.Logger.Warnw("NewRoom",
-		"msg", "Rooms limit")
+			"msg", "Rooms limit")
 
 		return nil, ErrorMaxRoomsLimit
 	}
 
 	facker, _ := faker.New("en")
-	roomName := facker.Word()
+	roomName := facker.Name()
 
 	id := g.RoomsCount + 1
+	g.RoomsCount++
 
 	config.Logger.Infow("NewRoom",
-	"msg", fmt.SprintF("New room [id:%v, name:%v] was created", id, roomName))
+		"msg", fmt.Sprintf("New room [id:%v, name:%v] was created", id, roomName))
 
 	return &room.Room{
-		Id: Ro
+		Id:   id,
+		Name: "TEST",
 	}, nil
 }
 
