@@ -4,9 +4,16 @@ import (
 	"BangGame/config"
 	"BangGame/pkg/room"
 	"fmt"
+	"sync"
 
+	"github.com/gorilla/websocket"
 	"github.com/manveru/faker"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 var GameInst = NewGame()
 
@@ -14,6 +21,7 @@ type Game struct {
 	MaxRoomsCount uint                `json:"max_rooms_count"`
 	Rooms         map[uint]*room.Room `json:"rooms"`
 	RoomsCount    uint                `json:"rooms_count"`
+	locker        sync.Mutex
 }
 
 func NewGame() *Game {
@@ -28,6 +36,9 @@ func NewGame() *Game {
 }
 
 func (g *Game) RoomsList() []*room.Room {
+	g.locker.Lock()
+	defer g.locker.Unlock()
+
 	rooms := []*room.Room{}
 	for _, room := range g.Rooms {
 		rooms = append(rooms, room)
@@ -37,12 +48,15 @@ func (g *Game) RoomsList() []*room.Room {
 }
 
 // Изменить способ получения id комнаты, возможны коллизии
-func (g *Game) NewRoom() (*room.Room, error) {
+func (g *Game) NewRoom() (room.RoomWrap, error) {
+	g.locker.Lock()
+	defer g.locker.Unlock()
+
 	if g.RoomsCount == g.MaxRoomsCount {
 		config.Logger.Warnw("NewRoom",
 			"msg", "Rooms limit")
 
-		return nil, ErrorMaxRoomsLimit
+		return room.RoomWrap{}, ErrorMaxRoomsLimit
 	}
 
 	facker, _ := faker.New("en")
@@ -62,9 +76,12 @@ func (g *Game) NewRoom() (*room.Room, error) {
 	config.Logger.Infow("NewRoom",
 		"msg", fmt.Sprintf("New room [id:%v, name:%v] was created", id, roomName))
 
-	return g.Rooms[id], nil
+	wrap := room.WrapedRoom(g.Rooms[id])
+	return wrap, nil
 }
 
 func (g *Game) DeleteRoom(id uint) {
+	g.locker.Lock()
+	defer g.locker.Unlock()
 
 }

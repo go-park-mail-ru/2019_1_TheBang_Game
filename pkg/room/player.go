@@ -15,5 +15,5 @@ type Player struct {
 }
 
 func PlayerFromCtx(ctx *gin.Context, conn *websocket.Conn) *Player {
-
+	return nil
 }
