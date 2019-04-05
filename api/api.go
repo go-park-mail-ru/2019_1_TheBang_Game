@@ -1,6 +1,6 @@
 package api
 
-type SockMsg struct {
-	Status string      `json:"status"`
-	Data   interface{} `json:"data"`
+type SocketMsg struct {
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
 }

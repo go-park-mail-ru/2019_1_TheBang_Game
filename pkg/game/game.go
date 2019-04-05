@@ -12,8 +12,8 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	ReadBufferSize:  config.SocketReadBufferSize,
+	WriteBufferSize: config.SocketWriteBufferSize,
 }
 
 var GameInst = NewGame()
@@ -42,11 +42,30 @@ func checkRoomID(id string) bool {
 		return false
 	}
 
+	GameInst.locker.Lock()
+	defer GameInst.locker.Unlock()
+
 	if _, ok := GameInst.Rooms[uint(ID)]; !ok {
 		return false
 	}
 
 	return true
+}
+
+func (g *Game) WrappedRoomsList() []room.RoomWrap {
+	g.locker.Lock()
+	defer g.locker.Unlock()
+
+	wraps := []room.RoomWrap{}
+
+	for id := range g.Rooms {
+		roomNode, _ := g.Rooms[id]
+		wrap := room.WrapedRoom(roomNode)
+
+		wraps = append(wraps, wrap)
+	}
+
+	return wraps
 }
 
 func (g *Game) RoomsList() []*room.Room {
@@ -73,18 +92,13 @@ func (g *Game) Room(id uint) (*room.Room, error) {
 	return room, nil
 }
 
-func (g *Game) WrappedRoom(id string) (room.RoomWrap, error) {
+func (g *Game) WrappedRoom(id uint) (room.RoomWrap, error) {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	ID, err := strconv.Atoi(id)
-	if err != nil {
-		return room.RoomWrap{}, err
-	}
-
-	gameRoom, ok := GameInst.Rooms[uint(ID)]
+	gameRoom, ok := GameInst.Rooms[id]
 	if !ok {
-		return room.RoomWrap{}, err
+		return room.RoomWrap{}, ErrorRoomNotFound
 	}
 
 	wrap := room.WrapedRoom(gameRoom)
@@ -112,6 +126,9 @@ func (g *Game) NewRoom() (room.RoomWrap, error) {
 		Id:         id,
 		Name:       roomName,
 		MaxPlayers: config.MaxPlayersInRoom,
+		Register:   make(chan *room.Player),
+		Unregister: make(chan *room.Player),
+		Players:    make(map[*room.Player]interface{}),
 	}
 	g.RoomsCount++
 

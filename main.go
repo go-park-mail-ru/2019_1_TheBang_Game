@@ -1,6 +1,7 @@
 package main
 
 import (
+	"BangGame/config"
 	"BangGame/pkg/game"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,5 @@ func main() {
 	router.POST("/room", game.CreateRoomHandle)
 	router.GET("/room/:id", game.ConnectRoomHandle)
 
-	router.Run(":8081")
-
+	router.Run(":" + config.PORT)
 }
