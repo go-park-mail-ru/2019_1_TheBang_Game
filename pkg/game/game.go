@@ -4,6 +4,7 @@ import (
 	"BangGame/config"
 	"BangGame/pkg/room"
 	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -35,6 +36,19 @@ func NewGame() *Game {
 	}
 }
 
+func checkRoomID(id string) bool {
+	ID, err := strconv.Atoi(id)
+	if err != nil {
+		return false
+	}
+
+	if _, ok := GameInst.Rooms[uint(ID)]; !ok {
+		return false
+	}
+
+	return true
+}
+
 func (g *Game) RoomsList() []*room.Room {
 	g.locker.Lock()
 	defer g.locker.Unlock()
@@ -45,6 +59,37 @@ func (g *Game) RoomsList() []*room.Room {
 	}
 
 	return rooms
+}
+
+func (g *Game) Room(id uint) (*room.Room, error) {
+	g.locker.Lock()
+	defer g.locker.Unlock()
+
+	room, ok := g.Rooms[id]
+	if !ok {
+		return nil, ErrorRoomNotFound
+	}
+
+	return room, nil
+}
+
+func (g *Game) WrappedRoom(id string) (room.RoomWrap, error) {
+	g.locker.Lock()
+	defer g.locker.Unlock()
+
+	ID, err := strconv.Atoi(id)
+	if err != nil {
+		return room.RoomWrap{}, err
+	}
+
+	gameRoom, ok := GameInst.Rooms[uint(ID)]
+	if !ok {
+		return room.RoomWrap{}, err
+	}
+
+	wrap := room.WrapedRoom(gameRoom)
+
+	return wrap, nil
 }
 
 // Изменить способ получения id комнаты, возможны коллизии

@@ -1,24 +1,12 @@
 package game
 
 import (
+	"BangGame/api"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
-
-func checkRoomID(id string) bool {
-	ID, err := strconv.Atoi(id)
-	if err != nil {
-		return false
-	}
-
-	if _, ok := GameInst.Rooms[uint(ID)]; !ok {
-		return false
-	}
-
-	return true
-}
 
 func ConnectRoomHandle(c *gin.Context) {
 	id := c.Param("id")
@@ -31,4 +19,18 @@ func ConnectRoomHandle(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		c.JSONP(http.StatusBadRequest, gin.H{
+			"message": "can not upgrade to websocket",
+		})
+	}
+
+	room, _ := GameInst.WrappedRoom(id)
+	msg := api.SockMsg{
+		Status: "room",
+		Data:   room,
+	}
+
+	websocket.WriteJSON(conn, msg)
 }
