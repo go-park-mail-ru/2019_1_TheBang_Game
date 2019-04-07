@@ -58,9 +58,10 @@ func (r *Room) Conection(player *Player) {
 
 	r.locker.Lock()
 	r.Players[player] = nil
+	r.PlayersCount++
 	r.locker.Unlock()
 
-	r.PlayersCount++
+	player.Room = r
 
 	config.Logger.Infow("Conection",
 		"msg", fmt.Sprintf("Player [id: %v, nick: %v] was connected to room [id: %v, name: %v]",
@@ -70,11 +71,10 @@ func (r *Room) Conection(player *Player) {
 func (r *Room) Disconection(player *Player) {
 	r.locker.Lock()
 	delete(r.Players, player)
+	r.PlayersCount--
 	r.locker.Unlock()
 
 	player.Conn.Close()
-
-	r.PlayersCount--
 
 	config.Logger.Infow("Conection",
 		"msg", fmt.Sprintf("Player [id: %v, nick: %v] was disconnected from room [id: %v, name: %v]",

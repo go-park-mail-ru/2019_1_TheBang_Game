@@ -18,6 +18,7 @@ type Player struct {
 	Conn     *websocket.Conn    `json:"-"`
 	In       chan api.SocketMsg `json:"-"`
 	Out      chan api.SocketMsg `json:"-"`
+	Room     *Room              `json:"-"`
 }
 
 func (p *Player) Reading() {
@@ -36,22 +37,23 @@ Loop:
 
 		err := p.Conn.WriteJSON(msg)
 		if err != nil {
-			log.Println(err.Error())
-			break Loop
+			fmt.Println(err.Error())
 		}
 	}
 }
 
 func (p *Player) Writing() {
 	go func() {
-		msg := &api.SocketMsg{}
-		err := p.Conn.ReadJSON(msg)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		for {
+			msg := &api.SocketMsg{}
+			err := p.Conn.ReadJSON(msg)
+			if websocket.IsUnexpectedCloseError(err) {
+				p.Room.Unregister <- p
+				return
+			}
 
-		p.Out <- *msg
+			p.Out <- *msg
+		}
 	}()
 
 	for {
