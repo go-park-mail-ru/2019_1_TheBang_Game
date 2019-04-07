@@ -52,7 +52,7 @@ type Room struct {
 
 func (r *Room) Conection(player *Player) {
 	if r.PlayersCount == r.MaxPlayers {
-		// ToDo выгнать и не прощаться
+		player.Conn.WriteJSON(api.TooManyPlayersMsg)
 		player.Conn.Close()
 	}
 
@@ -93,6 +93,12 @@ func (r *Room) SnapShot() {
 	}
 }
 
+func (r *Room) Distribution(msg api.SocketMsg) {
+	for player := range r.Players {
+		player.In <- msg
+	}
+}
+
 func (r *Room) RunRoom() {
 	config.Logger.Infow("RunRoom",
 		"msg", fmt.Sprintf("Room  [id: %v name: %v] opened", r.Id, r.Name))
@@ -111,12 +117,11 @@ Loop:
 
 		case player := <-r.Unregister:
 			r.Disconection(player)
-			// if r.PlayersCount == 0 {
-			// 	break Loop
-			// }
 
-		case t := <-ticker.C:
-			fmt.Println(t)
+		case msg := <-r.Broadcast:
+			r.Distribution(msg)
+
+		case <-ticker.C:
 			r.SnapShot()
 
 		case <-r.Closer:

@@ -40,52 +40,26 @@ Loop:
 			break Loop
 		}
 	}
-
-	// Loop:
-	// 	for {
-	// 		select {
-	// 		case msg, ok := <-p.In:
-	// 			p.Conn.SetWriteDeadline(time.Now().Add(config.WriteDeadline))
-	// 			if !ok {
-	// 				// ToDo подумать о сообщении для дисконекта
-	// 				p.Conn.WriteMessage(websocket.CloseMessage, []byte{})
-	// 				return
-	// 			}
-
-	// 			err := p.Conn.WriteJSON(msg)
-	// 			if err != nil {
-	// 				log.Println(err.Error())
-	// 				break Loop
-	// 			}
-
-	// 		case <-ticker.C:
-	// 			log.Println(p.Nickname, "Reading")
-	// 			p.In <- api.SocketMsg{
-	// 				Type: "test",
-	// 				Data: struct {
-	// 					Msg string
-	// 				}{Msg: "test"},
-	// 			}
-	// 		}
-	// 	}
 }
 
 func (p *Player) Writing() {
-	// // p.Conn.SetReadLimit(config.MaxMessageSize)
-	// // p.Conn.SetPongHandler(func(string) error { p.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	go func() {
+		msg := &api.SocketMsg{}
+		err := p.Conn.ReadJSON(msg)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 
-	// ticker := time.NewTicker(config.PlayerReadingTickTime)
-	// defer func() {
-	// 	ticker.Stop()
-	// 	p.Conn.Close()
-	// }()
+		p.Out <- *msg
+	}()
 
-	// for {
-	// 	select {
-	// 	case msg, ok := <-p.Out:
-
-	// 	}
-	// }
+	for {
+		msg, ok := <-p.Out
+		if ok {
+			log.Println(msg)
+		}
+	}
 }
 
 type UserInfo struct {
