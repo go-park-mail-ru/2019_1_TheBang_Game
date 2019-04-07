@@ -1,6 +1,7 @@
 package game
 
 import (
+	"BangGame/api"
 	"BangGame/config"
 	"BangGame/pkg/room"
 	"fmt"
@@ -129,6 +130,8 @@ func (g *Game) NewRoom() (room.RoomWrap, error) {
 		Register:   make(chan *room.Player),
 		Unregister: make(chan *room.Player),
 		Players:    make(map[*room.Player]interface{}),
+		Broadcast:  make(chan api.SocketMsg),
+		Closer:     make(chan struct{}),
 	}
 	g.RoomsCount++
 

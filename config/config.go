@@ -1,20 +1,29 @@
 package config
 
-import "os"
+import (
+	"os"
+	"time"
+)
 
 const (
-	MaxPlayersInRoom uint = 4
-	MaxRoomsInGame   uint = 10
+	MaxPlayersInRoom      uint = 4
+	MaxRoomsInGame        uint = 10
+	RoomTickTime               = 1 * time.Second
+	PlayerWritingTickTime      = 1 * time.Second
+	PlayerReadingTickTime      = 1 * time.Second
+
+	WriteDeadline = 10 * time.Second
+	// ReadingWait = 10 * time.Second
 )
 
 var Logger = NewGlobalLogger()
 
 var (
-	SocketReadBufferSize  = 1024
-	SocketWriteBufferSize = 1024
+	SocketReadBufferSize        = 1024
+	SocketWriteBufferSize       = 1024
+	MaxMessageSize        int64 = 512
+	InOutBuffer                 = 10
 )
-
-var InOutBuffer = 10
 
 var (
 	CookieName = "bang_token"
