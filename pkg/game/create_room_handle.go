@@ -9,7 +9,8 @@ import (
 func CreateRoomHandle(c *gin.Context) {
 	room, err := GameInst.NewRoom()
 	if err != nil {
-		c.JSONP(http.StatusConflict, room)
+		c.AbortWithStatus(http.StatusConflict)
+
 		return
 	}
 
