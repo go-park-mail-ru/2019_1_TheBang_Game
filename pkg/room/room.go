@@ -62,6 +62,7 @@ func (r *Room) Conection(player *Player) {
 	r.locker.Unlock()
 
 	player.Room = r
+	player.In <- api.ConectionMsg
 
 	config.Logger.Infow("Conection",
 		"msg", fmt.Sprintf("Player [id: %v, nick: %v] was connected to room [id: %v, name: %v]",
@@ -81,15 +82,14 @@ func (r *Room) Disconection(player *Player) {
 			player.Id, player.Nickname, r.Id, r.Name))
 }
 
-// Заглушка для рассылки
-func (r *Room) SnapShot() {
+func (r *Room) RoomSnapShot() {
+	snap := api.SocketMsg{
+		Type: api.RoomState,
+		Data: WrapedRoom(r),
+	}
+
 	for player := range r.Players {
-		player.In <- api.SocketMsg{
-			Type: "test",
-			Data: struct {
-				Msg string
-			}{Msg: "test"},
-		}
+		player.In <- snap
 	}
 }
 
@@ -122,7 +122,7 @@ Loop:
 			r.Distribution(msg)
 
 		case <-ticker.C:
-			r.SnapShot()
+			r.RoomSnapShot()
 
 		case <-r.Closer:
 			break Loop
