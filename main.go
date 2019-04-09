@@ -2,7 +2,7 @@ package main
 
 import (
 	"BangGame/config"
-	"BangGame/pkg/game"
+	"BangGame/pkg/app"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,9 +10,15 @@ import (
 func main() {
 	router := gin.Default()
 
-	router.GET("/room", game.RoomsListHandle)
-	router.POST("/room", game.CreateRoomHandle)
-	router.GET("/room/:id", game.ConnectRoomHandle)
+	router.GET("/room", app.RoomsListHandle)
+	router.POST("/room", app.CreateRoomHandle)
+	router.GET("/room/:id", app.ConnectRoomHandle)
+
+	router.GET("/check", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			// "state": game.NewMap(),
+		})
+	})
 
 	router.Run(":" + config.PORT)
 }

@@ -1,6 +1,7 @@
 package api
 
 const RoomState = "room_snap_shot"
+const GameState = "game_snap_shot"
 
 var TooManyPlayersMsg = SocketMsg{
 	Type: "disconection",

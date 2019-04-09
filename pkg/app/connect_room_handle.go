@@ -1,4 +1,4 @@
-package game
+package app
 
 import (
 	"BangGame/pkg/room"
@@ -18,8 +18,8 @@ func ConnectRoomHandle(c *gin.Context) {
 	param, _ := strconv.Atoi(id)
 	ID := uint(param)
 
-	GameInst.locker.Lock()
-	defer GameInst.locker.Unlock()
+	AppInst.locker.Lock()
+	defer AppInst.locker.Unlock()
 
 	if ok := c.IsWebsocket(); !ok {
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -39,5 +39,5 @@ func ConnectRoomHandle(c *gin.Context) {
 	player := room.PlayerFromCtx(c, conn)
 	go player.Reading()
 	go player.Writing()
-	GameInst.Rooms[ID].Register <- player
+	AppInst.Rooms[ID].Register <- player
 }

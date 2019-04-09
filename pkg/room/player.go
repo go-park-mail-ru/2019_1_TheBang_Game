@@ -4,7 +4,6 @@ import (
 	"BangGame/api"
 	"BangGame/config"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -56,11 +55,14 @@ func (p *Player) Writing() {
 		}
 	}()
 
+Loop:
 	for {
 		msg, ok := <-p.Out
-		if ok {
-			log.Println(msg)
+		if !ok {
+			break Loop
 		}
+
+		p.Room.Broadcast <- msg
 	}
 }
 

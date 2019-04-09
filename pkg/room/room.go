@@ -3,6 +3,7 @@ package room
 import (
 	"BangGame/api"
 	"BangGame/config"
+	"BangGame/pkg/game"
 	"fmt"
 	"sync"
 	"time"
@@ -46,7 +47,8 @@ type Room struct {
 	Register     chan *Player            `json:"-"`
 	Unregister   chan *Player            `json:"-"`
 	Broadcast    chan api.SocketMsg      `json:"-"`
-	Closer       chan struct{}           `json:"-"`
+	Closer       chan bool               `json:"-"`
+	Start        chan bool               `json:"-"`
 	locker       sync.Mutex              `json:"-"`
 }
 
@@ -99,6 +101,12 @@ func (r *Room) Distribution(msg api.SocketMsg) {
 	}
 }
 
+func (r *Room) NewGame() game.GameInst {
+	return game.GameInst{
+		//
+	}
+}
+
 func (r *Room) RunRoom() {
 	config.Logger.Infow("RunRoom",
 		"msg", fmt.Sprintf("Room  [id: %v name: %v] opened", r.Id, r.Name))
@@ -121,8 +129,16 @@ Loop:
 		case msg := <-r.Broadcast:
 			r.Distribution(msg)
 
+		case <-r.Start:
+			game := r.NewGame()
+			game.Run()
+
 		case <-ticker.C:
 			r.RoomSnapShot()
+
+			if r.PlayersCount == r.MaxPlayers {
+				r.Start <- true
+			}
 
 		case <-r.Closer:
 			break Loop
@@ -130,4 +146,28 @@ Loop:
 	}
 
 	// Тут наверно должен бвть дисконект всех, кто все таки остался в комнате
+}
+
+func (r *Room) StartGame() {
+	config.Logger.Infow("StartGem",
+		"msg", fmt.Sprintf("Game in room  [id: %v name: %v] was started", r.Id, r.Name))
+
+	defer config.Logger.Infow("StartGem",
+		"msg", fmt.Sprintf("Game in room  [id: %v name: %v] was finished", r.Id, r.Name))
+
+	ticker := time.NewTicker(config.GameTickTime)
+	defer ticker.Stop()
+
+	gameInst := game.NewGame()
+
+	//  продублировать отписку игроков но пока что синг плеер
+	for {
+		select {
+		case <-ticker.C:
+			r.Distribution(api.SocketMsg{
+				Type: api.GameState,
+				Data: gameInst.Snap(),
+			})
+		}
+	}
 }

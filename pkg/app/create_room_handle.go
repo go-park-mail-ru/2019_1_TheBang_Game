@@ -1,4 +1,4 @@
-package game
+package app
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 )
 
 func CreateRoomHandle(c *gin.Context) {
-	room, err := GameInst.NewRoom()
+	room, err := AppInst.NewRoom()
 	if err != nil {
 		c.AbortWithStatus(http.StatusConflict)
 

@@ -1,4 +1,4 @@
-package game
+package app
 
 import (
 	"net/http"
@@ -7,6 +7,6 @@ import (
 )
 
 func RoomsListHandle(c *gin.Context) {
-	rooms := GameInst.WrappedRoomsList()
+	rooms := AppInst.WrappedRoomsList()
 	c.JSONP(http.StatusOK, rooms)
 }
