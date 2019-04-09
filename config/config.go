@@ -27,9 +27,10 @@ var (
 )
 
 var (
-	CookieName = "bang_token"
-	SECRET     = getSecret()
-	PORT       = getPort()
+	CookieName  = "bang_token"
+	SECRET      = getSecret()
+	PORT        = getPort()
+	FrontentDst = getFrontDest()
 )
 
 func getSecret() []byte {
@@ -49,4 +50,13 @@ func getPort() string {
 		port = "8081"
 	}
 	return port
+}
+
+func getFrontDest() string {
+	dst := os.Getenv("FrontentDst")
+	if dst == "" {
+		Logger.Warn("There is no FrontentDst!")
+		dst = "http://localhost:3000"
+	}
+	return dst
 }
