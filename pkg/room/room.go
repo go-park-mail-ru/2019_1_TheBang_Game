@@ -3,7 +3,6 @@ package room
 import (
 	"BangGame/api"
 	"BangGame/config"
-	"BangGame/pkg/game"
 	"fmt"
 	"sync"
 	"time"
@@ -48,7 +47,8 @@ type Room struct {
 	Unregister   chan *Player            `json:"-"`
 	Broadcast    chan api.SocketMsg      `json:"-"`
 	Closer       chan bool               `json:"-"`
-	Start        chan bool               `json:"-"`
+	Start        bool                    `json:"-"`
+	GameInst     GameInst                `json:"-"`
 	locker       sync.Mutex              `json:"-"`
 }
 
@@ -84,26 +84,9 @@ func (r *Room) Disconection(player *Player) {
 			player.Id, player.Nickname, r.Id, r.Name))
 }
 
-func (r *Room) RoomSnapShot() {
-	snap := api.SocketMsg{
-		Type: api.RoomState,
-		Data: WrapedRoom(r),
-	}
-
-	for player := range r.Players {
-		player.In <- snap
-	}
-}
-
 func (r *Room) Distribution(msg api.SocketMsg) {
 	for player := range r.Players {
 		player.In <- msg
-	}
-}
-
-func (r *Room) NewGame() game.GameInst {
-	return game.GameInst{
-		//
 	}
 }
 
@@ -117,6 +100,7 @@ func (r *Room) RunRoom() {
 	ticker := time.NewTicker(config.RoomTickTime)
 	defer ticker.Stop()
 
+	// ToDo удаление разорвавших соединение пользователей
 Loop:
 	for {
 		select {
@@ -127,17 +111,43 @@ Loop:
 			r.Disconection(player)
 
 		case msg := <-r.Broadcast:
-			r.Distribution(msg)
-
-		case <-r.Start:
-			game := r.NewGame()
-			game.Run()
+			if r.Start == true {
+				r.GameInst.AcceptAction(msg.Data.(Action))
+			}
 
 		case <-ticker.C:
-			r.RoomSnapShot()
+			if r.Start == true {
+				if r.PlayersCount == 0 {
+					break Loop
+				}
+
+				r.Distribution(
+					api.SocketMsg{
+						Type: api.GameState,
+						Data: r.GameInst.Snap(),
+					})
+
+				continue
+			}
+
+			r.Distribution(api.SocketMsg{
+				Type: api.RoomState,
+				Data: WrapedRoom(r),
+			})
 
 			if r.PlayersCount == r.MaxPlayers {
-				r.Start <- true
+				r.Start = true
+				r.GameInst = NewGame(r)
+
+				config.Logger.Infow("GameInst Run",
+					"msg", fmt.Sprintf("Game in room [id: %v, name: %v] was started", r.Id, r.Name))
+
+				defer config.Logger.Infow("GameInst Run",
+					"msg", fmt.Sprintf("Game in room [id: %v, name: %v] was finished", r.Id, r.Name))
+
+				r.Distribution(api.GameStartedMsg)
+				defer r.Distribution(api.GameFinishedMsg)
+
 			}
 
 		case <-r.Closer:
@@ -146,28 +156,4 @@ Loop:
 	}
 
 	// Тут наверно должен бвть дисконект всех, кто все таки остался в комнате
-}
-
-func (r *Room) StartGame() {
-	config.Logger.Infow("StartGem",
-		"msg", fmt.Sprintf("Game in room  [id: %v name: %v] was started", r.Id, r.Name))
-
-	defer config.Logger.Infow("StartGem",
-		"msg", fmt.Sprintf("Game in room  [id: %v name: %v] was finished", r.Id, r.Name))
-
-	ticker := time.NewTicker(config.GameTickTime)
-	defer ticker.Stop()
-
-	gameInst := game.NewGame()
-
-	//  продублировать отписку игроков но пока что синг плеер
-	for {
-		select {
-		case <-ticker.C:
-			r.Distribution(api.SocketMsg{
-				Type: api.GameState,
-				Data: gameInst.Snap(),
-			})
-		}
-	}
 }

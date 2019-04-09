@@ -2,6 +2,7 @@ package api
 
 const RoomState = "room_snap_shot"
 const GameState = "game_snap_shot"
+const GameStarted = "start_game"
 
 var TooManyPlayersMsg = SocketMsg{
 	Type: "disconection",
@@ -18,5 +19,23 @@ var ConectionMsg = SocketMsg{
 		Msg string `json:"msg"`
 	}{
 		Msg: "You was conected to the room",
+	},
+}
+
+var GameStartedMsg = SocketMsg{
+	Type: GameStarted,
+	Data: struct {
+		Msg string `json:"msg"`
+	}{
+		Msg: "Game was started",
+	},
+}
+
+var GameFinishedMsg = SocketMsg{
+	Type: GameStarted,
+	Data: struct {
+		Msg string `json:"msg"`
+	}{
+		Msg: "Game was finished",
 	},
 }

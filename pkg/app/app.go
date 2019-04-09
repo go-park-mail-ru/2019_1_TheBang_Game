@@ -132,7 +132,7 @@ func (g *Game) NewRoom() (room.RoomWrap, error) {
 		Players:    make(map[*room.Player]interface{}),
 		Broadcast:  make(chan api.SocketMsg),
 		Closer:     make(chan bool, 1),
-		Start:      make(chan bool, 1),
+		Start:      false,
 	}
 	g.RoomsCount++
 

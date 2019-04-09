@@ -1,4 +1,4 @@
-package game
+package room
 
 import (
 	"BangGame/config"
@@ -36,13 +36,6 @@ type Position struct {
 	Y uint
 }
 
-type GameInst struct {
-	Map          GameMap
-	PlayersPos   map[string]Position
-	PlayersScore map[string]uint
-	GemsCount    uint // захардкодить число гемов
-}
-
 type GameSnap struct {
 	Map          GameMap         `json:"map"`
 	PlayersScore map[string]uint `json:"players_score"`
@@ -51,7 +44,7 @@ type GameSnap struct {
 
 type GameMap [height][width]cell
 
-func newMap() GameMap {
+func NewMap() GameMap {
 	config.Logger.Infow("NewMap",
 		"msg", fmt.Sprint("NewMap was generated"))
 
