@@ -5,6 +5,7 @@ import (
 	"BangGame/config"
 	"BangGame/pkg/room"
 	"fmt"
+	"net/http"
 	"strconv"
 	"sync"
 
@@ -15,10 +16,10 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  config.SocketReadBufferSize,
 	WriteBufferSize: config.SocketWriteBufferSize,
-	CheckOrigin: func(r *http.Request) bool{
+	CheckOrigin: func(r *http.Request) bool {
 		// todo проверять. что это локал хост
 		return true
-	}
+	},
 }
 
 var AppInst = NewApp()

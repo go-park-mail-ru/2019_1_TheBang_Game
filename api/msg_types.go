@@ -3,6 +3,7 @@ package api
 const RoomState = "room_snap_shot"
 const GameState = "game_snap_shot"
 const GameStarted = "start_game"
+const GameFinish = "finish_game"
 
 var TooManyPlayersMsg = SocketMsg{
 	Type: "disconection",
@@ -32,7 +33,7 @@ var GameStartedMsg = SocketMsg{
 }
 
 var GameFinishedMsg = SocketMsg{
-	Type: GameStarted,
+	Type: GameFinish,
 	Data: struct {
 		Msg string `json:"msg"`
 	}{

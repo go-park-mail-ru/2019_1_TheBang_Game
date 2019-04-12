@@ -26,9 +26,9 @@ const (
 )
 
 type Action struct {
-	Time   string `json:"time"`
-	Player string `json:"player"`
-	Move   string `json:"move" ` // left | right | up | down
+	Time   string `json:"time" mapstructure:"time"`
+	Player string `json:"player" mapstructure:"player"`
+	Move   string `json:"move" mapstructure:"move"` // left | right | up | down
 }
 
 type Position struct {

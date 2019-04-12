@@ -8,8 +8,8 @@ import (
 const (
 	MaxPlayersInRoom      uint = 1 // поправить и вернуть обратно
 	MaxRoomsInGame        uint = 10
-	RoomTickTime               = 1 * time.Second
-	GameTickTime               = 1 * time.Second // fps стоит обсуждений
+	RoomTickTime               = 5 * time.Second
+	// GameTickTime               = 1 * time.Second // fps стоит обсуждений
 	PlayerWritingTickTime      = 1 * time.Second
 	PlayerReadingTickTime      = 1 * time.Second
 

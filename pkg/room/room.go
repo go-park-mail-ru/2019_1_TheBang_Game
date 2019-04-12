@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type RoomWrap struct {
@@ -112,7 +114,20 @@ Loop:
 
 		case msg := <-r.Broadcast:
 			if r.Start == true {
-				r.GameInst.AcceptAction(msg.Data.(Action))
+				// fmt.Println(api.TooManyPlayersMsg)
+				fmt.Println(msg)
+				fmt.Println(msg.Data)
+
+				action := &Action{}
+				err := mapstructure.Decode(msg.Data, action)
+				if err != nil {
+					config.Logger.Warnw("GameInst Run",
+						"warn", fmt.Sprintf("Invalid action: %v", err.Error()))
+
+					continue
+				}
+
+				r.GameInst.AcceptAction(Action{})
 			}
 
 		case <-ticker.C:
