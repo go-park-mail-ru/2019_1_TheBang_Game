@@ -1,7 +1,5 @@
 package room
 
-import "fmt"
-
 var (
 	leftBorder  uint = 0
 	rightBorder uint = width - 1
@@ -14,7 +12,9 @@ type GameInst struct {
 	PlayersPos   map[string]Position
 	PlayersScore map[string]uint
 	GemsCount    uint // захардкодить число гемов
+	MaxGemsCount uint
 	Room         *Room
+	Teleport     bool // наличие тп на карте
 }
 
 func NewGame(r *Room) GameInst {
@@ -30,33 +30,39 @@ func NewGame(r *Room) GameInst {
 		PlayersPos:   pos,
 		PlayersScore: score,
 		GemsCount:    1, // захардкодить число гемов
+		MaxGemsCount: 1, // захардкодить число гемов
 		Room:         r,
 	}
 }
 
 func (g *GameInst) Snap() GameSnap {
 	return GameSnap{
-		Map: g.Map,
-		// PlayersScore: g.PlayersScore,
-		GemsCount: 1,
+		Map:          g.Map,
+		PlayersScore: g.PlayersScore,
+		GemsCount:    g.GemsCount,
+		MaxGemsCount: g.MaxGemsCount,
 	}
 }
 
-func (g *GameInst) Aggregation(actions ...Action) {
+func (g *GameInst) Aggregation(actions ...Action) bool {
 	for _, action := range actions {
-		g.AcceptAction(action)
-		fmt.Println()
+		ok := g.AcceptAction(action)
+		if ok {
+			return true
+		}
 	}
+
+	return false
 }
 
-func (g *GameInst) AcceptAction(action Action) {
+func (g *GameInst) AcceptAction(action Action) bool {
 	var (
 		pos Position
 		ok  bool
 	)
 
 	if pos, ok = g.PlayersPos[action.Player]; !ok {
-		return
+		return false
 	}
 
 	newpos := pos
@@ -84,12 +90,27 @@ func (g *GameInst) AcceptAction(action Action) {
 		}
 	}
 
-	// if g.Map[pos.X][pos.Y] == gem {
-	// 	g.PlayersScore[action.Player]++
-	// 	g.GemsCount--
-	// }
+	if g.Map[newpos.X][newpos.Y] == gem {
+		g.PlayersScore[action.Player]++
+		g.GemsCount--
+	}
+
+	if g.Map[newpos.X][newpos.Y] == teleport {
+		g.Map[pos.X][pos.Y] = groung
+		g.Map[newpos.X][newpos.Y] = player
+
+		return true
+	}
 
 	g.PlayersPos[action.Player] = newpos
 	g.Map[pos.X][pos.Y] = groung
 	g.Map[newpos.X][newpos.Y] = player
+
+	if g.GemsCount == 0 && !g.Teleport {
+		// хардкод телепорта
+		g.Map[2][2] = teleport
+		g.Teleport = true
+	}
+
+	return false
 }

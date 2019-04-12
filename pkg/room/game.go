@@ -40,6 +40,7 @@ type GameSnap struct {
 	Map          GameMap         `json:"map"`
 	PlayersScore map[string]uint `json:"players_score"`
 	GemsCount    uint            `json:"gems_count"`
+	MaxGemsCount uint            `json:"max_gems_count"`
 }
 
 type GameMap [height][width]cell

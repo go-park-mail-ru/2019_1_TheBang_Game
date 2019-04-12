@@ -124,7 +124,12 @@ Loop:
 					continue
 				}
 
-				r.GameInst.Aggregation(action)
+				ok := r.GameInst.Aggregation(action)
+				if ok {
+					r.Distribution(api.GameFinishedMsg)
+
+					break Loop
+				}
 			}
 
 		case <-ticker.C:
@@ -158,8 +163,6 @@ Loop:
 					"msg", fmt.Sprintf("Game in room [id: %v, name: %v] was finished", r.Id, r.Name))
 
 				r.Distribution(api.GameStartedMsg)
-				defer r.Distribution(api.GameFinishedMsg)
-
 			}
 
 		case <-r.Closer:
@@ -167,5 +170,8 @@ Loop:
 		}
 	}
 
-	// Тут наверно должен бвть дисконект всех, кто все таки остался в комнате
+	// отрубаем всех от игры
+	for player := range r.Players {
+		r.Disconection(player)
+	}
 }
