@@ -114,12 +114,9 @@ Loop:
 
 		case msg := <-r.Broadcast:
 			if r.Start == true {
-				// fmt.Println(api.TooManyPlayersMsg)
-				fmt.Println(msg)
-				fmt.Println(msg.Data)
 
-				action := &Action{}
-				err := mapstructure.Decode(msg.Data, action)
+				action := Action{}
+				err := mapstructure.Decode(msg.Data, &action)
 				if err != nil {
 					config.Logger.Warnw("GameInst Run",
 						"warn", fmt.Sprintf("Invalid action: %v", err.Error()))
@@ -127,15 +124,15 @@ Loop:
 					continue
 				}
 
-				r.GameInst.AcceptAction(Action{})
+				r.GameInst.Aggregation(action)
 			}
 
 		case <-ticker.C:
-			if r.Start == true {
-				if r.PlayersCount == 0 {
-					break Loop
-				}
+			if r.Start == true && r.PlayersCount == 0 {
+				break Loop
+			}
 
+			if r.Start == true {
 				r.Distribution(
 					api.SocketMsg{
 						Type: api.GameState,
