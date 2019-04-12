@@ -21,9 +21,14 @@ func NewGame(r *Room) GameInst {
 	score := make(map[string]uint)
 	pos := make(map[string]Position)
 
+	for player := range r.Players {
+		score[player.Nickname] = 0
+		pos[player.Nickname] = Position{}
+	}
+
 	// заглушка для синглплеера, сделать генерацию плееров и их позиции на карте
-	score["test"] = 0
-	pos["test"] = Position{}
+	// score["test"] = 0
+	// pos["test"] = Position{}
 
 	return GameInst{
 		Map:          NewMap(),

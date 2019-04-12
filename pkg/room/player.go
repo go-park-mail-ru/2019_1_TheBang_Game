@@ -3,6 +3,7 @@ package room
 import (
 	"BangGame/api"
 	"BangGame/config"
+	"BangGame/pkg/auth"
 	"fmt"
 	"time"
 
@@ -91,9 +92,12 @@ func PlayerFromCtx(ctx *gin.Context, conn *websocket.Conn) *Player {
 
 // ToDo просто заглушка на первое время
 func playerInfoFromCookie(ctx *gin.Context) UserInfo {
+	token := auth.TokenFromCookie(ctx.Request)
+	nickname, _ := auth.NicknameFromCookie(token)
+
 	return UserInfo{
 		Id:       1,
-		Nickname: "test",
+		Nickname: nickname,
 		PhotoURL: "test",
 	}
 }

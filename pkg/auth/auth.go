@@ -1,43 +1,78 @@
 package auth
 
 import (
-	"BangGame/config"
-	"BangGame/pkg/room"
 	"fmt"
+	"log"
+	"net/http"
+
+	"BangGame/config"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 )
 
-func PlayerInfoFromCookie(c *gin.Context) (room.UserInfo, error) {
-	cookie, err := c.Cookie(config.CookieName)
-	if err != nil {
-		return room.UserInfo{}, err
-	}
+type CustomClaims struct {
+	Id       uint   `json:"id"`
+	Nickname string `json:"nickname"`
+	PhotoURL string `json:"photo_url"`
 
-	token, _ := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
+	jwt.StandardClaims
+}
+
+func TokenFromCookie(r *http.Request) *jwt.Token {
+	cookie, _ := r.Cookie(config.CookieName)
+	tokenStr := cookie.Value
+	token, _ := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 
 		return config.SECRET, nil
 	})
+	return token
+}
 
-	var claims jwt.MapClaims
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		config.Logger.Warnw("PlayerInfoFromCookie",
-			"msg", "Can not convert jwt claims")
+func NicknameFromCookie(token *jwt.Token) (nickname string, status int) {
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		nickname = claims["nickname"].(string)
+	} else {
+		status = http.StatusInternalServerError
+		config.Logger.Warnw("NicknameFromCookie",
+			"warn", "Error with parsing token's claims")
 
-		return room.UserInfo{}, fmt.Errorf("Can not convert jwt claims")
+		return nickname, status
 	}
 
-	info := room.UserInfo{}
-	info.Id = claims["id"].(uint)
-	info.Nickname = claims["nickname"].(string)
-	info.PhotoURL = claims["photo_url"].(string)
+	return nickname, http.StatusOK
+}
 
-	fmt.Println(info)
+func CheckTocken(r *http.Request) (token *jwt.Token, ok bool) {
+	cookie, err := r.Cookie(config.CookieName)
+	if err != nil {
+		config.Logger.Warnw("CheckTocken",
+			"warn", err.Error())
+		return nil, false
+	}
 
-	return room.UserInfo{}, nil
+	tokenStr := cookie.Value
+
+	token, err = jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return config.SECRET, nil
+	})
+	if err != nil {
+		log.Printf("Error with check tocken: %v", err.Error())
+
+		return nil, false
+	}
+
+	if !token.Valid {
+		log.Printf("%v use faked cookie: %v\n", r.RemoteAddr, err.Error())
+
+		return nil, false
+	}
+
+	return token, true
 }

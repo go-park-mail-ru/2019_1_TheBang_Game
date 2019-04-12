@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	MaxPlayersInRoom uint = 1 // поправить и вернуть обратно
+	MaxPlayersInRoom uint = 2 // поправить и вернуть обратно
 	MaxRoomsInGame   uint = 10
 	RoomTickTime          = 5 * time.Second
 	// GameTickTime               = 1 * time.Second // fps стоит обсуждений
