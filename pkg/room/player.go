@@ -11,6 +11,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type UserInfo struct {
+	Id       uint   `json:"id"`
+	Nickname string `json:"nickname"`
+	PhotoURL string `json:"photo_url"`
+}
+
 type Player struct {
 	Id       uint               `json:"id"`
 	Nickname string             `json:"nickname"`
@@ -65,12 +71,6 @@ Loop:
 
 		p.Room.Broadcast <- msg
 	}
-}
-
-type UserInfo struct {
-	Id       uint   `json:"id"`
-	Nickname string `json:"nickname"`
-	PhotoURL string `json:"photo_url"`
 }
 
 func PlayerFromCtx(ctx *gin.Context, conn *websocket.Conn) *Player {
