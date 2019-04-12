@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	MaxPlayersInRoom      uint = 1 // поправить и вернуть обратно
-	MaxRoomsInGame        uint = 10
-	RoomTickTime               = 5 * time.Second
+	MaxPlayersInRoom uint = 1 // поправить и вернуть обратно
+	MaxRoomsInGame   uint = 10
+	RoomTickTime          = 5 * time.Second
 	// GameTickTime               = 1 * time.Second // fps стоит обсуждений
-	PlayerWritingTickTime      = 1 * time.Second
-	PlayerReadingTickTime      = 1 * time.Second
+	PlayerWritingTickTime = 1 * time.Second
+	PlayerReadingTickTime = 1 * time.Second
 
 	WriteDeadline = 10 * time.Second
 	// ReadingWait = 10 * time.Second
@@ -56,7 +56,7 @@ func getFrontDest() string {
 	dst := os.Getenv("FrontentDst")
 	if dst == "" {
 		Logger.Warn("There is no FrontentDst!")
-		dst = "http://localhost:3000"
+		dst = "http://127.0.0.1:3000"
 	}
 	return dst
 }
