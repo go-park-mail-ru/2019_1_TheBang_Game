@@ -3,7 +3,6 @@ package room
 import (
 	"BangGame/api"
 	"BangGame/config"
-	"BangGame/pkg/auth"
 	"fmt"
 	"time"
 
@@ -12,13 +11,13 @@ import (
 )
 
 type UserInfo struct {
-	Id       uint   `json:"id"`
+	Id       float64   `json:"id"`
 	Nickname string `json:"nickname"`
 	PhotoURL string `json:"photo_url"`
 }
 
 type Player struct {
-	Id       uint               `json:"id"`
+	Id       float64               `json:"id"`
 	Nickname string             `json:"nickname"`
 	PhotoURL string             `json:"photo_url"`
 	Conn     *websocket.Conn    `json:"-"`
@@ -92,12 +91,12 @@ func PlayerFromCtx(ctx *gin.Context, conn *websocket.Conn) *Player {
 
 // ToDo просто заглушка на первое время
 func playerInfoFromCookie(ctx *gin.Context) UserInfo {
-	token := auth.TokenFromCookie(ctx.Request)
-	nickname, _ := auth.NicknameFromCookie(token)
+	token := TokenFromCookie(ctx.Request)
+	info, _ := InfoFromCookie(token)
 
 	return UserInfo{
-		Id:       1,
-		Nickname: nickname,
-		PhotoURL: "test",
+		Id:       info.Id,
+		Nickname: info.Nickname,
+		PhotoURL: info.PhotoURL,
 	}
 }

@@ -1,4 +1,4 @@
-package auth
+package room
 
 import (
 	"fmt"
@@ -11,9 +11,9 @@ import (
 )
 
 type CustomClaims struct {
-	Id       uint   `json:"id"`
-	Nickname string `json:"nickname"`
-	PhotoURL string `json:"photo_url"`
+	Id       float64 `json:"id"`
+	Nickname string  `json:"nickname"`
+	PhotoURL string  `json:"photo_url"`
 
 	jwt.StandardClaims
 }
@@ -31,18 +31,22 @@ func TokenFromCookie(r *http.Request) *jwt.Token {
 	return token
 }
 
-func NicknameFromCookie(token *jwt.Token) (nickname string, status int) {
+func InfoFromCookie(token *jwt.Token) (userInfo UserInfo, status int) {
+	userInfo = UserInfo{}
+
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		nickname = claims["nickname"].(string)
+		userInfo.Id = claims["id"].(float64)
+		userInfo.Nickname = claims["nickname"].(string)
+		userInfo.PhotoURL = claims["photo_url"].(string)
 	} else {
 		status = http.StatusInternalServerError
 		config.Logger.Warnw("NicknameFromCookie",
 			"warn", "Error with parsing token's claims")
 
-		return nickname, status
+		return userInfo, status
 	}
 
-	return nickname, http.StatusOK
+	return userInfo, http.StatusOK
 }
 
 func CheckTocken(r *http.Request) (token *jwt.Token, ok bool) {
