@@ -36,12 +36,12 @@ func CorsMiddleware(c *gin.Context) {
 }
 
 func AuthMiddleware(c *gin.Context) {
+	if c.Request.Method == "OPTIONS" {
+		return
+	}
+
 	check := urlMehtod{URL: c.Request.URL.Path, Method: c.Request.Method}
 	if ok := ignorCheckAuth[check]; !ok {
-		if check.Method == "OPTIONS" {
-			return
-		}
-
 		_, ok := room.CheckTocken(c.Request)
 		if !ok {
 			c.AbortWithStatus(http.StatusUnauthorized)
