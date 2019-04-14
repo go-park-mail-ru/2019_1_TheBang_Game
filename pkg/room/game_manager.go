@@ -26,10 +26,6 @@ func NewGame(r *Room) GameInst {
 		pos[player.Nickname] = Position{}
 	}
 
-	// заглушка для синглплеера, сделать генерацию плееров и их позиции на карте
-	// score["test"] = 0
-	// pos["test"] = Position{}
-
 	return GameInst{
 		Map:          NewMap(),
 		PlayersPos:   pos,
