@@ -50,6 +50,10 @@ func InfoFromCookie(token *jwt.Token) (userInfo UserInfo, status int) {
 }
 
 func CheckTocken(r *http.Request) (token *jwt.Token, ok bool) {
+	// дебажу
+	fmt.Println("!!!!", r.Cookies(), "!!!!")
+	// дебажу
+
 	cookie, err := r.Cookie(config.CookieName)
 	if err != nil {
 		config.Logger.Warnw("CheckTocken",
