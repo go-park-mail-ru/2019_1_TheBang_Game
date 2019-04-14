@@ -3,11 +3,9 @@ package main
 import (
 	"BangGame/config"
 	"BangGame/pkg/app"
+	"BangGame/pkg/room"
 	"fmt"
 	"net/http"
-	"BangGame/pkg/room"
-
-
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,13 +36,29 @@ func CorsMiddleware(c *gin.Context) {
 }
 
 func AuthMiddleware(c *gin.Context) {
-	_, ok := room.CheckTocken(c.Request)
-	if !ok {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		fmt.Println("Bad token")
+	check := urlMehtod{URL: c.Request.URL.Path, Method: c.Request.Method}
+	if ok := ignorCheckAuth[check]; !ok {
+		if check.Method == "OPTIONS" {
+			return
+		}
 
-		return
+		_, ok := room.CheckTocken(c.Request)
+		if !ok {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			fmt.Println("Bad token")
+
+			return
+		}
 	}
 
 	c.Next()
+}
+
+type urlMehtod struct {
+	URL    string
+	Method string
+}
+
+var ignorCheckAuth = map[urlMehtod]bool{
+	urlMehtod{URL: "/room", Method: "POST"}: true,
 }
