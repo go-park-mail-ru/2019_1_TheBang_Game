@@ -1,43 +1,46 @@
 package middleware
 
-// import (
-// 	"net/http"
-// )
+import (
+	"BangGame/config"
+	"BangGame/pkg/room"
+	"net/http"
 
-// type urlMehtod struct {
-// 	URL    string
-// 	Method string
-// }
+	"github.com/gin-gonic/gin"
+)
 
-// var ignorCheckAuth = map[urlMehtod]bool{}
+type urlMehtod struct {
+	URL    string
+	Method string
+}
 
-// func AuthMiddleware(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		check := urlMehtod{URL: r.URL.Path, Method: r.Method}
-// 		if ok := ignorCheckAuth[check]; !ok {
-// 			if r.Method == "OPTIONS" {
-// 				return
-// 			}
+var ignorCheckAuth = map[urlMehtod]bool{
+	urlMehtod{URL: "/room", Method: "POST"}: true,
+}
 
-// 			if _, ok := CheckTocken(r); !ok {
-// 				w.WriteHeader(http.StatusUnauthorized)
+func CorsMiddleware(c *gin.Context) {
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", config.FrontentDst)
+	c.Header("Access-Control-Allow-Credentials", "true")
+	c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
-// 				return
-// 			}
-// 		}
+	c.Next()
+}
 
-// 		next.ServeHTTP(w, r)
-// 	})
-// }
+func AuthMiddleware(c *gin.Context) {
+	if c.Request.Method == "OPTIONS" {
+		return
+	}
 
-// func CommonMiddleware(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		w.Header().Add("Content-Type", "application/json")
-// 		w.Header().Set("Access-Control-Allow-Origin", config.FrontentDst)
-// 		w.Header().Set("Access-Control-Allow-Credentials", "true")
-// 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-// 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	check := urlMehtod{URL: c.Request.URL.Path, Method: c.Request.Method}
+	if ok := ignorCheckAuth[check]; !ok {
+		_, ok := room.CheckTocken(c.Request)
+		if !ok {
+			c.AbortWithStatus(http.StatusUnauthorized)
 
-// 		next.ServeHTTP(w, r)
-// 	})
-// }
+			return
+		}
+	}
+
+	c.Next()
+}
