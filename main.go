@@ -4,6 +4,10 @@ import (
 	"BangGame/config"
 	"BangGame/pkg/app"
 	"fmt"
+	"net/http"
+	"BangGame/pkg/room"
+
+
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +18,7 @@ func main() {
 	config.Logger.Info(fmt.Sprintf("PORT: %v", config.PORT))
 
 	router := gin.Default()
-	router.Use(CorsMiddleware)
+	router.Use(CorsMiddleware, AuthMiddleware)
 
 	router.GET("/room", app.RoomsListHandle)
 	router.POST("/room", app.CreateRoomHandle)
@@ -29,6 +33,18 @@ func CorsMiddleware(c *gin.Context) {
 	c.Header("Access-Control-Allow-Credentials", "true")
 	c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+	c.Next()
+}
+
+func AuthMiddleware(c *gin.Context) {
+	_, ok := room.CheckTocken(c.Request)
+	if !ok {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		fmt.Println("Bad token")
+
+		return
+	}
 
 	c.Next()
 }
