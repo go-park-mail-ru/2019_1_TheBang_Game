@@ -26,6 +26,10 @@ func main() {
 }
 
 func CorsMiddleware(c *gin.Context) {
+	if c.Request.Method == "OPTIONS" {
+		return
+	}
+
 	c.Header("Content-Type", "application/json")
 	c.Header("Access-Control-Allow-Origin", config.FrontentDst)
 	c.Header("Access-Control-Allow-Credentials", "true")
