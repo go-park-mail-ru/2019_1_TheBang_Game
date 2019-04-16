@@ -9,11 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	defer config.Logger.Sync()
-	config.Logger.Info(fmt.Sprintf("FrontenDest: %v", config.FrontentDst))
-	config.Logger.Info(fmt.Sprintf("PORT: %v", config.PORT))
-
+func setUpRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.CorsMiddleware,
 		middleware.AuthMiddleware)
@@ -21,6 +17,16 @@ func main() {
 	router.GET("/room", app.RoomsListHandle)
 	router.POST("/room", app.CreateRoomHandle)
 	router.GET("/room/:id", app.ConnectRoomHandle)
+
+	return router
+}
+
+func main() {
+	defer config.Logger.Sync()
+	config.Logger.Info(fmt.Sprintf("FrontenDest: %v", config.FrontentDst))
+	config.Logger.Info(fmt.Sprintf("PORT: %v", config.PORT))
+
+	router := setUpRouter()
 
 	router.Run(":" + config.PORT)
 }
