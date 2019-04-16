@@ -1,10 +1,26 @@
-package main
+package test
 
 import (
+	"BangGame/pkg/app"
+	"BangGame/pkg/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 )
+
+func setUpRouter() *gin.Engine {
+	router := gin.Default()
+	router.Use(middleware.CorsMiddleware,
+		middleware.AuthMiddleware)
+
+	router.GET("/room", app.RoomsListHandle)
+	router.POST("/room", app.CreateRoomHandle)
+	router.GET("/room/:id", app.ConnectRoomHandle)
+
+	return router
+}
 
 func TestCreateRoomHandle(t *testing.T) {
 	router := setUpRouter()
