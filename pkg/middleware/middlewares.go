@@ -2,8 +2,7 @@ package middleware
 
 import (
 	"BangGame/config"
-	"BangGame/pkg/room"
-	"net/http"
+	"BangGame/pkg/auth"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +14,7 @@ type urlMehtod struct {
 
 var ignorCheckAuth = map[urlMehtod]bool{
 	urlMehtod{URL: "/room", Method: "POST"}: true,
-	urlMehtod{URL: "/room", Method: "GET"}:  true,
+	// urlMehtod{URL: "/room", Method: "GET"}:  true,
 }
 
 func CorsMiddleware(c *gin.Context) {
@@ -35,10 +34,7 @@ func AuthMiddleware(c *gin.Context) {
 
 	check := urlMehtod{URL: c.Request.URL.Path, Method: c.Request.Method}
 	if ok := ignorCheckAuth[check]; !ok {
-		_, ok := room.CheckTocken(c.Request)
-		if !ok {
-			c.AbortWithStatus(http.StatusUnauthorized)
-
+		if _, ok := auth.CheckTocken(c.Request); !ok {
 			return
 		}
 	}

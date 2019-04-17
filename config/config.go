@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	MaxPlayersInRoom uint = 2 // поправить и вернуть обратно
+	MaxPlayersInRoom uint = 1 // поправить и вернуть обратно
 	MaxRoomsInGame   uint = 10
 	RoomTickTime          = 5 * time.Second
 	// GameTickTime               = 1 * time.Second // fps стоит обсуждений
@@ -28,6 +28,7 @@ var (
 
 var (
 	CookieName  = "bang_token"
+	AuthServer  = "127.0.0.1:50051"
 	SECRET      = getSecret()
 	PORT        = getPort()
 	FrontentDst = getFrontDest()
@@ -37,7 +38,7 @@ func getSecret() []byte {
 	secret := []byte(os.Getenv("SECRET"))
 	if string(secret) == "" {
 		Logger.Warn("There is no SECRET!")
-		secret = []byte("secret")
+		secret = []byte("SECRET")
 	}
 
 	return secret
